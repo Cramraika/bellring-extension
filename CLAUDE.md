@@ -8,88 +8,215 @@
 
 **Sources**: `~/.claude/conventions/universal-claudemd.md` (laws, MCP routing, lifecycle, rent rubric) + `~/.claude/conventions/project-hygiene.md` (doc placement, cleanup, local-workspaces). Read relevant sections before significant work. Re-audit due **2026-07-19**. Sync: `~/.claude/scripts/sync-preambles.py`.
 
-## Product Overview
+---
 
-| Product | Real-Time Sales Celebration System (Chrome Extension) |
-|---------|-------------------------------------------------------|
-| **What it does** | Chrome extension that displays real-time celebratory popups (trophy animations) when any BDE closes a sale. Also shows general announcements and private messages from managers. The visible, user-facing half of the Sales Notification system. |
-| **Who uses it** | ~300 BDEs at Coding Ninjas install this in Chrome. They authenticate once with their `@codingninjas.com` email and passively receive notifications while working. No daily interaction required -- it runs in the background. |
-| **Status** | Production (v1.0.4, Manifest V3). Distributed internally via Chrome Developer mode (Load unpacked). |
-| **Organization** | SMPL562 |
-| **Companion repo** | `sales-notification-backend` (backend API + WebSocket server) |
+## 1. Product Overview
 
-## Product Features and User Journeys
+Chrome MV3 extension that displays real-time celebratory popups (trophy animations) when a BDE closes a sale, plus general announcements and private messages. The visible half of the Sales Notification system; pairs with `sales-notification-backend` (Node + Express + ws + SendGrid on Render). v1.0.4, production since 2024, ~300 BDEs at Coding Ninjas. Distributed via "Load unpacked" in `chrome://extensions/` (not on Chrome Web Store).
 
-### 1. Sale Celebration Popup (Core Experience)
-- **User journey**: BDE is working in Chrome. A colleague closes a sale. Within seconds, a trophy animation popup appears showing the seller's name, product sold, and manager name. Popup auto-dismisses after a few seconds.
-- **Success signals**: Popup appears within 2-3 seconds of the sale webhook. Animation renders correctly. Sound effect plays. BDE feels the team energy and motivation.
-- **Failure signals**: Popup never appears (WebSocket disconnected, backend down). Animation is broken or laggy. Popup appears on wrong monitor or is hidden behind windows. Too many popups stack and become annoying.
+Remote: `SMPL562/sales-notification-extension` (push currently blocked — no direct push until org access restored; work locally + squash later).
 
-### 2. OTP Authentication (First-Time Setup)
-- **User journey**: BDE installs extension via "Load unpacked" in `chrome://extensions/`. Clicks extension icon. Fullscreen auth popup appears. Enters `@codingninjas.com` email, requests OTP, checks email, enters OTP. Token stored for 30 days.
-- **Success signals**: Auth completes in under 2 minutes. Token persists across Chrome restarts. Settings dropdown shows after auth.
-- **Failure signals**: OTP email delayed or never arrives. Auth popup doesn't appear. Token expires unexpectedly. Re-auth required too frequently.
-
-### 3. General Announcements (Passive Notifications)
-- **User journey**: Manager sends an announcement via the backend webhook. All authenticated BDEs see a notification popup with the message.
-- **Success signals**: Announcement visible and readable. Clearly distinct from sale celebrations.
-- **Failure signals**: Announcement missed because BDE was offline. No way to review past announcements.
-
-### 4. Private Messages (Targeted Communication)
-- **User journey**: Manager targets a specific BDE by email via the webhook. Only that BDE's extension displays the private message.
-- **Success signals**: Only the intended BDE sees the message. Message is clearly marked as private.
-- **Failure signals**: Private message shown to wrong BDE. Target BDE is offline and never receives it.
-
-### 5. WebSocket Reconnection (Reliability)
-- **User journey**: If the backend goes down or network drops, the extension automatically attempts reconnection with exponential backoff (max 5 attempts, 10s base delay).
-- **Success signals**: Connection recovers automatically. BDE doesn't notice brief outages.
-- **Failure signals**: Reconnection fails after 5 attempts. BDE doesn't know they're disconnected. No visual indicator of connection status.
-
-## Known Product Limitations
-- No notification history -- missed popups are gone forever
-- No visual indicator of connection health (BDE doesn't know if they're disconnected)
-- Internal distribution only (not on Chrome Web Store)
-- API URL is Base64-encoded in source (security through obscurity, mitigated by backend token auth)
-- 30-day auth expiry requires re-authentication
+**Product vision (roadmap north star)**: white-label pivot to **Salvo** — a generic $19-99/mo SaaS (browser ext + webhook receiver) for any sales team. Full spec at `~/.claude/specs/2026-04-19-sales-notification-whitelabel.md`. Current repo stays as internal tool; Salvo forks to `Cramraika/salvo-extension`, `salvo-webhook-worker`, `salvo-dashboard`, `salvo-landing`.
 
 ---
 
-## Technical Reference
+## 2. References
 
-### Stack
-- Chrome Extension (Manifest V3), vanilla JavaScript, Chrome APIs (storage, alarms, system.display, activeTab)
+- **Universal laws + MCP routing + rent rubric + ceilings**: `~/.claude/conventions/universal-claudemd.md`
+- **Doc placement + cleanup + hygiene**: `~/.claude/conventions/project-hygiene.md`
+- **Environments**: `docs/ENVIRONMENTS.md`
+- **Salvo white-label spec (authoritative roadmap)**: `~/.claude/specs/2026-04-19-sales-notification-whitelabel.md`
+- **Companion backend**: `~/Documents/Github/sales-notification-backend/` (SMPL562/sales-notification-backend)
 
-### File Organization
-- Never save working files to root folder
-- `manifest.json` - Extension config (Manifest V3, permissions, service worker)
-- `background.js` - Service worker: WebSocket connection, auth flow, popup management
-- `popup.html` / `popup.js` - Notification display with animations and sound effects
-- `action.html` / `action.js` - Auth UI (OTP flow) and settings panel
-- `icon48.png` / `icon128.png` - Extension icons
+---
 
-### Key Architecture
-- `ExtensionManager` class in `background.js` manages all state
-- API URL is Base64-encoded in `background.js` (decodes to Render backend URL)
-- Auth via OTP to `@codingninjas.com` emails, token stored in `chrome.storage.local`
-- WebSocket reconnection with exponential backoff (max 5 attempts, 10s base delay)
-- No build step required - plain JavaScript loaded directly by Chrome
+## 3. Stack
 
-### Build & Test
+- **Runtime**: Chrome Extension Manifest V3, service worker, vanilla JavaScript (no build step)
+- **Chrome APIs**: `storage` (auth token in `chrome.storage.local`), `alarms` (keep-alive), `system.display` (multi-monitor popup placement), `activeTab`
+- **Transport**: raw `WebSocket` against `wss://sales-notification-backend.onrender.com/ws?token=<uuid>`
+- **Auth**: OTP to `@codingninjas.com` email → UUID token → `Authorization: Bearer` for REST + `?token=` for WS
+- **CSP**: `script-src 'self'; object-src 'self'` (no remote script execution)
+- **Distribution**: Unpacked dev-mode load (no Chrome Web Store listing yet)
+
+---
+
+## 4. Active Role-Lanes
+
+Based on present state + Salvo pinnacle:
+
+- **Frontend engineer (extension)** — MV3 service worker lifecycle, Chrome API quirks, popup HTML/CSS/animations, keepalive + reconnect patterns
+- **Backend integrator** — WebSocket protocol compat with `sales-notification-backend`; canonical event schema (sale_made / notification / private)
+- **Designer** — trophy popup UX, sound effects, brand config (Salvo multi-tenant branding)
+- **QA / tester** — manual QA across Chrome versions + multi-monitor setups; no automated extension tests today
+- **Security** — token flow audit, CSP hardening, permission-minimization for CWS submission
+- **Product / GTM** (Salvo phase) — pricing, CRM adapter roadmap, Chrome Web Store listing, Product Hunt launch
+
+---
+
+## 5. Build / Test / Deploy
+
 ```bash
-# No build step. Load unpacked in chrome://extensions/ with Developer mode enabled.
-# To test: click extension icon, authenticate with OTP, verify WebSocket connection.
+# Build
+# — No build step. Chrome loads files directly.
+
+# Install locally
+# 1. Navigate to chrome://extensions/
+# 2. Toggle Developer mode ON
+# 3. Click "Load unpacked" → pick this repo root
+
+# Test
+# — Manual. Click icon → auth with @codingninjas.com OTP → verify WS connects
+#   → trigger test webhook via sales-notification-backend → verify popup renders
+# — No automated test suite. CI only runs:
+#     - JSON validity check on manifest.json
+#     - `node --check` on all *.js files
+
+# CI
+# .github/workflows/ci.yml runs on push/PR to main (ignores *.md, docs/**, .claude/**, .vscode/**)
+
+# Deploy
+# — No deploy pipeline. Distribution = share the folder; BDEs load unpacked.
+# — For Salvo: Chrome Web Store + Firefox Add-ons + Edge Add-ons submissions (Phase 3).
 ```
 
-### n8n Workflow Automation
+---
 
-This project can trigger and receive n8n workflows at `https://n8n.chinmayramraika.in`.
+## 6. Key Directories / Files
 
-- **Webhook URL:** Set in `N8N_WEBHOOK_URL` env var
-- **API Key:** Set in `N8N_API_KEY` env var (unique per project)
-- **Auth Header:** `X-API-Key: <N8N_API_KEY>`
-- **Workflow repo:** github.com/Cramraika/n8n-workflows (private)
+- `manifest.json` — MV3 config, permissions, service worker entry, host permissions pinned to `sales-notification-backend.onrender.com`
+- `background.js` — `ExtensionManager` class: WebSocket lifecycle, OTP flow, popup dispatch, keepalive alarm, exponential backoff reconnect (max 5 attempts, 10s base delay). Base64-encoded API URL at `getApiBaseUrl()` (line ~88).
+- `popup.html` / `popup.js` — rendered notification: trophy animation, sale_made / notification / private branches, sound effect, auto-dismiss
+- `action.html` / `action.js` — browser-action dropdown UI: fullscreen auth popup when unauthenticated, settings panel (logout, popup-enable toggle) when authenticated
+- `icon48.png`, `icon128.png` — extension icons
+- `docs/ENVIRONMENTS.md` — local dev setup + deployment status + troubleshooting
+- `.github/workflows/ci.yml` — manifest + JS syntax validation
+- `.claude/settings.json` — per-project Claude Code config
 
-### Security Rules
-- NEVER hardcode API keys, secrets, or credentials in any file
-- NEVER pass credentials as inline env vars in Bash commands
-- NEVER commit .env, .claude/settings.local.json, or .mcp.json to git
+**Never save working files to repo root.** Scratch → `/tmp/claude-scratch/`.
+
+---
+
+## 7. Dependency Graph
+
+**Upstream (this extension consumes)**:
+- `sales-notification-backend` (SMPL562) — WebSocket server on Render, OTP REST endpoints (`/request-otp`, `/verify-otp`), webhook ingestion (`/webhook`). Hard-coded in base64 URL. If backend is down, no popups.
+- SendGrid (via backend) — OTP email delivery. Outage = BDEs can't re-authenticate after 30 days.
+- Chrome/Chromium runtime — MV3 service worker 30s lifecycle, `chrome.alarms`, `chrome.storage.local`, `chrome.system.display`.
+- Render.com — backend host; free-tier cold starts delay first popup after idle.
+
+**Downstream (this extension feeds)**:
+- ~300 BDE Chrome installations (SMPL562 distribution) — the end-user UI surface.
+- (Future, Salvo) Chrome Web Store + Firefox Add-ons + Edge Add-ons listings.
+
+**Sibling / related**:
+- `sales-notification-backend` — authoritative counterpart; schema and auth flow changes must land in both.
+- `n8n-workflows` (private, Cramraika) — can POST to backend `/webhook` via `n8n.chinmayramraika.in` for automation drills.
+
+---
+
+## 8. Roadmap
+
+### Near-term (v1.x, internal Coding Ninjas)
+- **Fix silent disconnects** — add connection-state indicator in settings UI (user can see WS health). R12 in Salvo risk register.
+- **Notification history** — `chrome.storage.local` ring buffer of last 50 events with timestamps; settings-panel "recent" tab.
+- **Sound toggle per event_type** — mute announcements, keep sale_made audible.
+- **Better multi-monitor behavior** — remember last-used display per user.
+
+### Salvo white-label pivot (authoritative spec: `~/.claude/specs/2026-04-19-sales-notification-whitelabel.md`)
+- **Phase 0 (Week 0, 2-3 days)**: fork to `Cramraika/salvo-extension`; strip all `@codingninjas.com` / "Coding Ninjas" branding; remove base64 URL hack; register `salvo.sh` domain.
+- **Phase 1 (Weeks 1-2, 30h)**: swap `ws` for `@supabase/supabase-js` Realtime subscribe; drop standalone backend (Supabase Auth + Postgres + Realtime owns state); read `apiBaseUrl` + `workspaceSlug` from `chrome.storage.sync`; install-time onboarding popup reads workspace slug from invite URL query param; brand config loader fetches workspace `brand_config` on connect and themes popup.
+- **Phase 2 (Week 3)**: Stripe tiers (Free $0 / Team $19 / Growth $79 / Enterprise $299+) wired via MCP; PostHog event taxonomy; Sentry browser SDK.
+- **Phase 3 (Week 4)**: Chrome Web Store + Firefox Add-ons + Edge Add-ons submissions; privacy + ToS + DPA pages; docs site at `docs.salvo.sh`.
+- **Phase 4 (Weeks 5-6)**: CRM adapters — LeadSquared (P0, flagship), Salesforce + HubSpot (P1), Pipedrive + Close (P2). Adapter wizard in dashboard. Product Hunt launch.
+- **Phase 5 (ongoing)**: SAML/SCIM (Enterprise gate), analytics v2, custom animation uploader, self-host Docker image, SOC 2 Type II if Enterprise pipeline >3 deals.
+
+### Cross-browser port (Salvo Phase 1)
+- Single codebase, build script produces **three** `.zip` bundles with manifest variants:
+  - Chrome: current manifest
+  - Firefox MV3 (121+): add `browser_specific_settings.gecko.id`
+  - Edge: ships as Chromium, same `.zip` works (separate Add-ons submission)
+
+---
+
+## 9. Past / History
+
+- **v1.0.4** (current) — production since 2024 at Coding Ninjas. Last 30 commits include: `1cadc37` fix memory leak + dead code + misleading connection status; `7ba0e9a` CI upgrade to ASM quality standard; `071fb86` MIT LICENSE; `05a97ba` environment setup guide; `501c1f8` initial CI workflow with manifest + JS syntax validation; `4d29ba1` Claude Code configuration.
+- Pre-`501c1f8` history is noisy ("Update background.js", "Update popup.html" — ad-hoc commits). Post-CI rollout is conventional-commit clean.
+- **Preamble bumped v4→v5→v6→v7→v7-compact→v8** sequentially over 2026-04 sprint (universal-claudemd.md ratchet). Latest: `43c821d docs(claude): sync preamble to v8`.
+- **Known design artefacts still in tree** carried forward deliberately: base64 URL (security theater; kept because backend token auth is the real gate, removing is make-work), hardcoded `@codingninjas.com` domain check (will only be stripped in Salvo fork — no point churning the internal tool).
+
+---
+
+## 10. Observability
+
+**Currently thin** — a gap to close.
+
+- **Client errors**: no Sentry wired in extension today. Salvo Phase 1 adds `@sentry/browser` with source maps + breadcrumb tagging per `event_type`.
+- **WebSocket reconnection health**: logged to service-worker console only; no remote collection. BDEs don't know when they're disconnected (R12 in Salvo risk register, P0 fix).
+- **Keep-alive + ping/pong**: alarms fire every 1 min; log line per reconnect attempt. No metric export.
+- **User analytics**: none. Salvo adds PostHog — `extension_installed{browser}`, `extension_realtime_connected`, `extension_realtime_disconnected{code, duration_ms}`, `extension_popup_shown{event_type}`, `extension_popup_dismissed{time_visible_ms}`, `extension_popups_toggled{enabled}`.
+- **Monitoring dashboards**: none for the extension itself. Backend monitored via Render logs only.
+- **Per-Salvo**: Grafana alerts via `mcp__grafana__*` on Supabase concurrent-connection cap and per-workspace webhook error rate (R3, R4 in spec).
+
+---
+
+## 11. Known Limitations
+
+- **Single-tenant** — everything hard-wired to Coding Ninjas: `@codingninjas.com` OTP domain check (backend), `sales-notification-backend.onrender.com` host pin, "Coding Ninjas IT Team" author in `manifest.json`.
+- **API URL is Base64-encoded** in `background.js:88` — security theater; mitigated by backend token auth. Remove in Salvo fork (`apiBaseUrl` from `chrome.storage.sync`).
+- **No notification history** — missed popups (offline, asleep, closed Chrome) are gone forever.
+- **No connection-state UI** — BDE has no way to see if they're currently disconnected.
+- **No automated tests** — manual QA only. CI is manifest + JS syntax check only.
+- **Chrome-only** — Firefox + Edge not packaged. Salvo Phase 1 port.
+- **30-day auth expiry** forces periodic re-auth via OTP; no refresh-token rotation.
+- **MV3 service worker 30s lifecycle** — keepalive alarm works, but long gaps can still drop WS. Supabase Realtime will inherit this constraint; keepalive pattern ported verbatim to Salvo.
+- **No Chrome Web Store presence** — internal distribution only, limiting install reliability and user trust signals.
+- **Render cold starts** — free-tier backend sleeps; first webhook after idle takes 10-30s to reach popup.
+
+---
+
+## 12. Security & Secrets
+
+- **No secrets in extension code.** Auth is per-user UUID token stored in `chrome.storage.local` (per-profile, sandboxed to this extension by Chrome).
+- **Base64 URL obfuscation** at `background.js:88` — cosmetic only, trivially decoded. Backend token auth + CORS + rate limit are the real defenses.
+- **CSP**: `script-src 'self'; object-src 'self'` — blocks remote/inline script injection.
+- **Permissions are minimal**: `storage`, `alarms`, `system.display`, `activeTab`. Audit `activeTab` usage before CWS submission — may be removable.
+- **`host_permissions`** pinned to single origin — prevents arbitrary backend switching.
+- **Never commit** `.env`, `.claude/settings.local.json`, or `.mcp.json`.
+- **Token rotation**: 30-day expiry, full re-auth via OTP. No refresh token today.
+
+---
+
+## 13. External Services (MCPs, integrations)
+
+- **GitHub**: `SMPL562/sales-notification-extension` (push blocked currently — stage locally, resume when access restored)
+- **Render**: hosts the paired backend; no direct MCP routing
+- **SendGrid** (via backend): OTP email delivery
+- **n8n** (`n8n.chinmayramraika.in`): can POST test events to backend `/webhook` — set `N8N_WEBHOOK_URL` + `N8N_API_KEY` env if wiring a drill
+- **Future (Salvo)**:
+  - `supabase` MCP — auth + Postgres + Realtime + Storage for brand assets
+  - `stripe` MCP — products/prices/webhooks for tier billing
+  - `posthog` MCP — extension event taxonomy + funnels
+  - `sentry` MCP — browser SDK error tracking
+  - `stitch` + `claude_ai_Figma` — landing page + brand config UI design
+  - `infisical` — secrets management across dev/staging/prod envs
+  - `claude_ai_Gmail` — `support@salvo.sh` labels + triage
+  - `linear` — Salvo project tickets (adapter roadmap)
+  - `grafana` + `loki` — alerting on connection cap + webhook error rate
+  - `claude_ai_Slack` — milestone broadcast to personal Slack
+- **MCPs this project does NOT need**: `figma` is useful for Salvo UI but not core extension work — leave enabled, don't invoke for internal-tool bugfixes.
+
+---
+
+## 14. README curation stance
+
+**Frozen** per `project-hygiene.md` (internal ops tool; user owns framing). Only edit `README.md` on explicit user request. Claude can propose — never surprise-update.
+
+---
+
+## 15. Deviations from Universal Laws
+
+- **None structural.** Base64-encoded URL predates the universal law framework and is documented as intentional (§11) — kept for internal tool; removed in Salvo fork. Not a deviation; a time-bounded carried artefact.
+- **Push to `main` allowed on this repo while SMPL562 access is blocked** — work lands locally, no remote push possible until access restored. Once unblocked, resume pre-push hook + branch protection flow from the Cramraika template.
+- **No CHANGELOG.md** — release-having-repos-only rule (`project-hygiene.md` unsettled-rule #4) and this repo doesn't publish releases. Adopt CHANGELOG.md in Salvo fork (Chrome Web Store requires versioned changelog).
