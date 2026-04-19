@@ -10,6 +10,10 @@
 
 ---
 
+## 0. Status / Tier
+
+**Tier B — maintained, production-touching.** v1.0.4 in production at CN (reference customer) since 2024; distributed via "Load unpacked". No active feature work pre-Bellring-multi-tenant-pivot; fixes land only when a user-impacting bug surfaces (memory leak + dead-code fix at `1cadc37`; CI upgrade at `7ba0e9a`). Chrome Web Store / Firefox Add-ons / Edge Add-ons submissions are Phase 3 of the Bellring commercialization spec. Product brand lives under **Vagary Labs → Product brands → Bellring** (universal §41).
+
 ## 1. Product Overview
 
 **Bellring Extension** — the visible browser-extension half of **Bellring**, a whitelabel SaaS for sales-team celebration notifications. Brand philosophy: the sales-floor bell-ringing ritual every team does when a deal closes — unmissable, visceral, team-wide. Renders real-time celebratory popups (trophy animations) when a rep closes a sale, plus general announcements and private messages. Pairs with **`bellring-server`** (Node + Express + ws + SendGrid backend). v1.0.4 in production since 2024, ~300 BDEs at Coding Ninjas (reference customer). Distributed via "Load unpacked" in `chrome://extensions/` (not on Chrome Web Store yet — Phase 3 publishes to Chrome Web Store + Firefox Add-ons + Edge Add-ons).
@@ -214,6 +218,24 @@ Based on present state + Bellring pinnacle:
 ## 14. README curation stance
 
 **Frozen** per `project-hygiene.md` (whitelabel SaaS brand surface; user owns framing). Only edit `README.md` on explicit user request. Claude can propose — never surprise-update.
+
+---
+
+## 14.a Doc Maintainers
+
+| Doc | Posture | Update trigger |
+|---|---|---|
+| `CLAUDE.md` | **Live contract** | Stack shift, new permission / API, Bellring-pivot phase transition |
+| `README.md` | **Frozen** per hygiene § README curation (whitelabel brand surface) | Explicit user request only (Chrome Web Store submission is the next likely trigger — Phase 3) |
+| `docs/ENVIRONMENTS.md` | Live — ops-living | Config/setup change, new troubleshooting case |
+| `manifest.json` | **Spec-SSOT** (not docs) — permission / host / version edits require justification | On behavior/permission change |
+| Pair-repo (`bellring-server`) `CLAUDE.md` | Sibling — cross-reference on any schema / auth flow change | Any `event_type` schema / WebSocket protocol / OTP flow change |
+
+Doc-maintainer: Chinmay. Claude edits CLAUDE.md + ENVIRONMENTS.md on request; `manifest.json` edits require explicit user review (permission expansion is a CWS-review risk).
+
+## 14.b Future `CHANGELOG.md`
+
+Not yet created. Introduce at Bellring Phase 3 (Chrome Web Store submission) — CWS listing requires versioned changelog, and Firefox Add-ons listing benefits from one. Format: Keep a Changelog + Conventional Commits. Placement: repo root (not `docs/`).
 
 ---
 
