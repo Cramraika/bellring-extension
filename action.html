@@ -3,15 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Sales Notification Settings</title>
-  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500&family=Oswald:wght@500&display=swap" rel="stylesheet">
+  <title>Bellring — Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      /* Bellring brand tokens (ported from docs/design/palette.md 2026-04-20) */
+      --brand-primary:        #FFD24A;      /* bellring yellow */
+      --brand-primary-hover:  #FFE07A;
+      --brand-primary-active: #DAB139;
+      --brand-secondary:        #3B82F6;    /* teammate blue */
+      --brand-secondary-hover:  #5B95F7;
+      --brand-secondary-active: #256AD9;
+
+      --neutral-50:  #F5F7FB;
+      --neutral-100: #E6EAF2;
+      --neutral-200: #C4CAD8;
+      --neutral-300: #939BAF;
+      --neutral-500: #424A60;
+      --neutral-700: #1C2134;
+      --neutral-800: #121626;
+      --neutral-900: #0A0D1A;
+
+      --semantic-success: #3CCB7F;
+      --semantic-warning: #FFB547;
+      --semantic-error:   #FF5E6F;
+    }
+
     body {
-      font-family: 'Work Sans', Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      color: #414141;
+      background: var(--neutral-50);
+      color: var(--neutral-800);
       width: 350px;
       min-height: 500px;
       display: flex;
@@ -28,36 +51,36 @@
       text-align: center;
       width: 100%;
       max-width: 300px;
-      border: 2px solid #f16222;
+      border: 2px solid var(--brand-primary);
     }
 
     h1 {
-      font-family: 'Oswald', sans-serif;
-      color: #f16222;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      color: var(--neutral-900);
       font-size: 24px;
       margin-bottom: 20px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: -0.01em;
     }
 
     p {
       font-size: 14px;
       line-height: 1.6;
       margin: 15px 0;
-      color: #666;
+      color: var(--neutral-500);
     }
 
     .error {
-      color: #d32f2f;
+      color: var(--semantic-error);
       font-weight: 500;
-      background-color: #ffebee;
+      background-color: #ffe5e8;
       padding: 10px;
       border-radius: 8px;
       margin: 10px 0;
     }
 
     .success {
-      color: #2e7d32;
+      color: var(--semantic-success);
       font-weight: 500;
       background-color: #e8f5e8;
       padding: 10px;
@@ -68,57 +91,59 @@
     .submit-btn, .toggle-btn, .logout-btn {
       margin: 15px 5px;
       padding: 12px 20px;
-      background-color: #f16222;
-      color: #ffffff;
+      background-color: var(--brand-primary);
+      color: var(--neutral-900);
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-family: 'Work Sans', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       transition: all 0.3s ease;
       min-width: 100px;
     }
 
     .submit-btn:hover, .toggle-btn:hover {
-      background-color: #d14e1c;
+      background-color: var(--brand-primary-hover);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(241, 98, 34, 0.3);
+      box-shadow: 0 4px 12px rgba(255, 210, 74, 0.4);
     }
 
     .submit-btn:disabled {
-      background-color: #ccc;
+      background-color: var(--neutral-200);
+      color: var(--neutral-500);
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
 
     .logout-btn {
-      background-color: #757575;
+      background-color: var(--neutral-300);
+      color: #ffffff;
       font-size: 12px;
       padding: 8px 16px;
       margin-top: 20px;
     }
 
     .logout-btn:hover {
-      background-color: #616161;
+      background-color: var(--neutral-500);
     }
 
     input[type="email"], input[type="text"] {
       padding: 12px;
       margin: 10px 0;
       width: 85%;
-      border: 2px solid #e0e0e0;
+      border: 2px solid var(--neutral-200);
       border-radius: 8px;
-      font-family: 'Work Sans', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
       transition: border-color 0.3s ease;
     }
 
     input[type="email"]:focus, input[type="text"]:focus {
       outline: none;
-      border-color: #f16222;
-      box-shadow: 0 0 0 3px rgba(241, 98, 34, 0.1);
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(255, 210, 74, 0.2);
     }
 
     .toggle-container {
@@ -127,14 +152,14 @@
       justify-content: space-between;
       margin: 20px 0;
       padding: 15px;
-      background-color: #f9f9f9;
+      background-color: var(--neutral-50);
       border-radius: 8px;
     }
 
     .toggle-label {
       font-size: 14px;
       font-weight: 500;
-      color: #333;
+      color: var(--neutral-700);
     }
 
     .toggle-switch {
@@ -157,7 +182,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #ccc;
+      background-color: var(--neutral-200);
       transition: 0.4s;
       border-radius: 24px;
     }
@@ -176,7 +201,7 @@
     }
 
     input:checked + .slider {
-      background-color: #f16222;
+      background-color: var(--brand-primary);
     }
 
     input:checked + .slider:before {
@@ -199,23 +224,25 @@
     }
 
     .feature-info {
-      background-color: #e3f2fd;
+      background-color: #eaf1ff;
       padding: 15px;
       border-radius: 8px;
       margin: 15px 0;
-      border-left: 4px solid #2196f3;
+      border-left: 4px solid var(--brand-secondary);
     }
 
     .feature-info h3 {
       margin: 0 0 10px 0;
-      color: #1976d2;
+      color: var(--brand-secondary-active);
       font-size: 16px;
+      font-family: 'Inter', sans-serif;
     }
 
     .feature-info p {
       margin: 5px 0;
       font-size: 12px;
-      color: #424242;
+      color: var(--neutral-700);
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
     }
 
     .status-indicator {
@@ -227,12 +254,12 @@
     }
 
     .status-connected {
-      background-color: #4caf50;
+      background-color: var(--semantic-success);
       animation: pulse 2s infinite;
     }
 
     .status-disconnected {
-      background-color: #f44336;
+      background-color: var(--semantic-error);
     }
 
     @keyframes pulse {
@@ -246,7 +273,7 @@
   <div class="container">
     <h1 id="title">Authenticate</h1>
     <p id="message"></p>
-    
+
     <!-- Authentication Form -->
     <div id="authForm" style="display: none;">
       <p id="authMessage">Enter your @codingninjas.com email:</p>
@@ -278,10 +305,10 @@
 
      <div class="feature-info">
   <h3>Features</h3>
-  <p><span style="color: #f16222;">●</span> Real-time sale notifications</p>
-  <p><span style="color: #f16222;">●</span> Personal messages</p>
-  <p><span style="color: #f16222;">●</span> Customizable display options</p>
-  <p><span style="color: #f16222;">●</span> Chrome Web Store compliant</p>
+  <p><span style="color: var(--brand-primary-active);">●</span> Real-time sale notifications</p>
+  <p><span style="color: var(--brand-primary-active);">●</span> Personal messages</p>
+  <p><span style="color: var(--brand-primary-active);">●</span> Customizable display options</p>
+  <p><span style="color: var(--brand-primary-active);">●</span> Chrome Web Store compliant</p>
 </div>
 
       <button class="logout-btn" id="logoutButton">Logout</button>
