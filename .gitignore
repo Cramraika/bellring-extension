@@ -21,3 +21,11 @@ build/
 
 # VS Code
 .vscode/
+
+# Tooling output dirs (per memory rule §2.3)
+.ast-grep/
+.cgcignore
+.claude/skills/
+.gitnexus/
+.gitnexusignore
+.serena/
