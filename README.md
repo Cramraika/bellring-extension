@@ -90,3 +90,38 @@ The **Sales Notification Chrome Extension** is designed for *~300 Business Devel
 
 - The extension relies on a stable **WebSocket** connection to the backend. If the backend is down, notifications won’t be received until it’s back online.
 - The API URL, while **Base64-encoded**, can be decoded. Backend security (token authentication, CORS, rate limiting) mitigates this risk.
+
+## **Error Reporting (Sentry / Glitchtip)**
+
+The extension ships with a vendored `@sentry/browser` SDK wired against the
+self-hosted Glitchtip instance at `errors.chinmayramraika.in`.
+
+**Build-time setup (operator, pre-Chrome-Web-Store packaging):**
+
+1. Pull DSN from Infisical (path
+   `main-host:/host-page/BELLRING_EXTENSION_GLITCHTIP_DSN`) and export it:
+
+   ```bash
+   export BELLRING_EXTENSION_GLITCHTIP_DSN="$(infisical secrets get --plain ...)"
+   ```
+
+2. Fetch the vendored SDK bundle (once per release):
+
+   ```bash
+   ./scripts/fetch-sentry-vendor.sh
+   ```
+
+3. Generate the DSN config file:
+
+   ```bash
+   ./scripts/build-config.sh
+   ```
+
+4. Zip the extension as normal. `vendor/sentry.bundle.js` and `config.generated.js`
+   are gitignored and recreated per release.
+
+When `BELLRING_EXTENSION_GLITCHTIP_DSN` is unset (e.g. dev / CI), the SDK silently
+no-ops — the extension keeps working without error reporting.
+
+`host_permissions` includes `https://errors.chinmayramraika.in/*` so Sentry can
+POST events without cross-origin issues.

@@ -1,3 +1,14 @@
+// Sentry init in MV3 service worker context (Glitchtip OW-106 activation).
+// Loads vendored @sentry/browser bundle + build-generated DSN config, then init.
+// All three scripts are CSP-safe under script-src 'self'.
+try {
+  importScripts('vendor/sentry.bundle.js', 'config.generated.js', 'sentry-init.js');
+} catch (e) {
+  // Vendor / config not present (fresh clone before scripts/fetch-sentry-vendor.sh
+  // + scripts/build-config.sh). Extension keeps working without Sentry.
+  console.warn('[sentry] importScripts skipped:', e && e.message);
+}
+
 class ExtensionManager {
   constructor() {
     this.ws = null;
