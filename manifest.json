@@ -21,7 +21,8 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://sales-notification-backend.onrender.com/*"
+    "https://sales-notification-backend.onrender.com/*",
+    "https://errors.chinmayramraika.in/*"
   ],
   "icons": {
     "48": "icon48.png",
