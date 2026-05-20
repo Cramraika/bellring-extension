@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" fill="#0A0D1A"/>
+  <!-- Bell glyph (simplified) -->
+  <g transform="translate(512, 360)">
+    <path d="M 0 -120 C -75 -120 -120 -65 -120 0 L -120 80 L -150 110 L -150 130 L 150 130 L 150 110 L 120 80 L 120 0 C 120 -65 75 -120 0 -120 Z"
+          fill="#FFD24A"/>
+    <circle cx="0" cy="-150" r="18" fill="#FFD24A"/>
+    <ellipse cx="0" cy="155" rx="22" ry="28" fill="#FFD24A"/>
+  </g>
+  <text x="512" y="680" font-family="'DM Sans', sans-serif" font-size="160"
+        font-weight="600" fill="#FFD24A"
+        text-anchor="middle" dominant-baseline="central"
+        letter-spacing="-4">Bellring</text>
+</svg>
