@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bellring — Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    :root {
+      --brand-primary:        #FFD24A;
+      --brand-primary-hover:  #FFE07A;
+      --brand-primary-active: #DAB139;
+      --brand-secondary:      #3B82F6;
+      --brand-tertiary:       #E91E63;
+
+      --neutral-50:  #F5F7FB;
+      --neutral-100: #E6EAF2;
+      --neutral-300: #8A92A6;
+      --neutral-500: #4A5168;
+      --neutral-700: #1C2134;
+      --neutral-800: #121626;
+      --neutral-900: #0A0D1A;
+      --neutral-950: #05070F;
+
+      --semantic-success: #3CCB7F;
+      --semantic-danger:  #E5484D;
+
+      --bell-glow:    0 0 32px rgba(255, 210, 74, 0.25);
+      --card-shadow:  0 8px 24px rgba(0, 0, 0, 0.4);
+      --border:       1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--neutral-950);
+      color: var(--neutral-100);
+      min-height: 100vh;
+      padding: 48px 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .shell {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .bell {
+      font-size: 28px;
+      color: var(--brand-primary);
+      filter: drop-shadow(var(--bell-glow));
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      color: var(--neutral-300);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .card {
+      background: var(--neutral-900);
+      border: var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--neutral-100);
+    }
+
+    .card-hint {
+      font-size: 12px;
+      color: var(--neutral-300);
+    }
+
+    /* Tier switcher — segmented control */
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: var(--neutral-800);
+      padding: 6px;
+      border-radius: 10px;
+    }
+
+    .tier {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 14px 12px;
+      cursor: pointer;
+      color: var(--neutral-300);
+      transition: all 0.18s ease;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .tier:hover { color: var(--neutral-100); }
+
+    .tier[aria-pressed="true"] {
+      background: var(--neutral-700);
+      border-color: var(--brand-primary);
+      color: var(--neutral-100);
+      box-shadow: 0 0 0 1px rgba(255, 210, 74, 0.25), var(--bell-glow);
+    }
+
+    .tier-name {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .tier[aria-pressed="true"] .tier-name { color: var(--brand-primary); }
+
+    .tier-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .tier-blurb {
+      font-size: 11px;
+      color: var(--neutral-300);
+      line-height: 1.4;
+    }
+
+    /* Volume row */
+    .vol-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .vol-icon {
+      width: 36px;
+      text-align: center;
+      color: var(--neutral-300);
+      font-size: 16px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: var(--neutral-800);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--brand-primary);
+      cursor: pointer;
+      box-shadow: var(--bell-glow);
+      transition: transform 0.1s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+    .vol-readout {
+      width: 44px;
+      text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--brand-primary);
+    }
+
+    /* Toggle rows */
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-top: var(--border);
+    }
+
+    .toggle-row:first-child { border-top: none; padding-top: 0; }
+
+    .toggle-label .tl-name { font-size: 14px; font-weight: 500; }
+    .toggle-label .tl-desc { font-size: 12px; color: var(--neutral-300); margin-top: 2px; }
+
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute; inset: 0;
+      background: var(--neutral-700);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: var(--neutral-100);
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--brand-primary);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(18px);
+      background: var(--neutral-900);
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--neutral-300);
+    }
+
+    .saved {
+      color: var(--semantic-success);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .saved.show { opacity: 1; }
+
+    .footer a { color: var(--brand-primary); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <i class="fa-solid fa-bell bell"></i>
+      <div>
+        <div class="title">Bellring Settings</div>
+        <div class="subtitle">Configure your celebration experience</div>
+      </div>
+    </header>
+
+    <!-- Tier -->
+    <section class="card" aria-labelledby="tier-label">
+      <div class="card-head">
+        <div class="card-title" id="tier-label">Plan</div>
+        <div class="card-hint">Switch tiers anytime · billed monthly</div>
+      </div>
+      <div class="tier-grid" role="radiogroup" aria-labelledby="tier-label">
+        <button class="tier" role="radio" aria-pressed="false" data-tier="starter" type="button">
+          <div class="tier-name"><i class="fa-solid fa-bell"></i> Starter</div>
+          <div class="tier-price">$19<span style="font-size:11px;color:var(--neutral-300)">/mo</span></div>
+          <div class="tier-blurb">Up to 10 reps · core notifications</div>
+        </button>
+        <button class="tier" role="radio" aria-pressed="true" data-tier="team" type="button">
+          <div class="tier-name"><i class="fa-solid fa-users"></i> Team</div>
+          <div class="tier-price">$79<span style="font-size:11px;color:var(--neutral-300)">/mo</span></div>
+          <div class="tier-blurb">Up to 50 reps · custom sounds · multi-monitor</div>
+        </button>
+        <button class="tier" role="radio" aria-pressed="false" data-tier="scale" type="button">
+          <div class="tier-name"><i class="fa-solid fa-rocket"></i> Scale</div>
+          <div class="tier-price">$299<span style="font-size:11px;color:var(--neutral-300)">/mo</span></div>
+          <div class="tier-blurb">Unlimited · CRM adapters · SSO</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- Volume -->
+    <section class="card" aria-labelledby="vol-label">
+      <div class="card-head">
+        <div class="card-title" id="vol-label">Notification Volume</div>
+        <div class="card-hint">Bell chime on celebration</div>
+      </div>
+      <div class="vol-row">
+        <div class="vol-icon" id="volIcon"><i class="fa-solid fa-volume-high"></i></div>
+        <input type="range" id="volume" min="0" max="100" value="70" aria-label="Notification volume">
+        <div class="vol-readout"><span id="volReadout">70</span>%</div>
+      </div>
+    </section>
+
+    <!-- Sound preferences -->
+    <section class="card" aria-labelledby="sound-label">
+      <div class="card-head">
+        <div class="card-title" id="sound-label">Notifications</div>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <div class="tl-name">Mute all sounds</div>
+          <div class="tl-desc">Popups still appear, just silent</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="muteAll">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <div class="tl-name">Sale closures</div>
+          <div class="tl-desc">Trophy + bell on every win</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="evtSale" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <div class="tl-name">Team broadcasts</div>
+          <div class="tl-desc">Manager-sent announcements</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="evtBroadcast" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <div class="tl-name">Private messages</div>
+          <div class="tl-desc">1-to-1 nudges</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="evtPrivate" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span class="saved" id="saved"><i class="fa-solid fa-check"></i> Saved</span>
+      <a href="https://github.com/Cramraika/bellring-extension" target="_blank" rel="noopener">v1.0.4 · docs</a>
+    </div>
+  </div>
+
+  <!-- Sentry SDK (vendored; no-ops if vendor/ or config.generated.js missing) -->
+  <script src="vendor/sentry.bundle.js"></script>
+  <script src="config.generated.js"></script>
+  <script src="sentry-init.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
