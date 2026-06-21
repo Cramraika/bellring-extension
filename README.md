@@ -125,3 +125,7 @@ no-ops — the extension keeps working without error reporting.
 
 `host_permissions` includes `https://errors.chinmayramraika.in/*` so Sentry can
 POST events without cross-origin issues.
+
+## License
+
+Proprietary — © 2026 Vagary Labs. All rights reserved. See [LICENSE](LICENSE).
