@@ -39,3 +39,4 @@ lychee.toml
 #   main-host:/host-page/BELLRING_EXTENSION_GLITCHTIP_DSN
 vendor/sentry.bundle.js
 config.generated.js
+.ast-grep/last-scan.log
