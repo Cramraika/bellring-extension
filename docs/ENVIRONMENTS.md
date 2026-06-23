@@ -1,6 +1,6 @@
-# Environments - Sales Notification Extension
+# Environments - Bellring Extension
 
-**Repo**: SMPL562/sales-notification-extension
+**Repo**: Cramraika/bellring-extension
 **Stack**: Chrome Extension (Manifest V3), vanilla JavaScript, Chrome APIs
 
 ---
@@ -11,14 +11,14 @@
 
 - Google Chrome browser
 - A `@codingninjas.com` email address for authentication
-- The [sales-notification-backend](https://github.com/SMPL562/sales-notification-backend) must be running
+- The [bellring-server](https://github.com/Cramraika/bellring-server) backend must be running
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/SMPL562/sales-notification-extension.git
-   cd sales-notification-extension
+   git clone https://github.com/Cramraika/bellring-extension.git
+   cd bellring-extension
    ```
 
 2. Load the extension in Chrome:
@@ -45,7 +45,7 @@ This is a plain JavaScript extension -- no bundler, transpiler, or npm install n
 | `version` | 1.0.4 |
 | `service_worker` | `background.js` |
 | `permissions` | `storage`, `alarms`, `system.display`, `activeTab` |
-| `host_permissions` | `https://sales-notification-backend.onrender.com/*` |
+| `host_permissions` | `https://sales-notification-backend.onrender.com/*`, `https://errors.chinmayramraika.in/*` |
 | `content_security_policy` | `script-src 'self'; object-src 'self'` |
 
 ### File Map

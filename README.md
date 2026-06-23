@@ -1,8 +1,18 @@
-# Sales Notification Chrome Extension
+# Bellring — Browser Extension
 
 ## **Overview**
 
-The **Sales Notification Chrome Extension** is designed for *~300 Business Development Executives (BDEs)* at **Coding Ninjas** to receive **real-time notifications** about **sales activities**, **important announcements**, and **private messages**. The extension displays a **celebratory popup** with a *trophy animation* for sales, and simple notifications for other messages. It uses **WebSocket** for real-time updates and integrates with a backend API for user authentication via **OTP**.
+**Bellring** is a whitelabel SaaS for sales-team celebration notifications. This repo is the
+**browser-extension surface** (Chrome MV3); the backend lives in the paired
+[`bellring-server`](https://github.com/Cramraika/bellring-server) repo.
+
+The extension delivers **real-time notifications** about **sales activities**, **important
+announcements**, and **private messages**. It displays a **celebratory popup** with a *trophy
+animation* for sales, and simple notifications for other messages. It uses **WebSocket** for
+real-time updates and integrates with the backend for user authentication via **OTP**.
+
+> **Reference customer:** the live deployment serves ~300 Business Development Executives (BDEs)
+> at **Coding Ninjas**, with authentication scoped to `@codingninjas.com` emails.
 
 ### **Features**
 
@@ -18,7 +28,7 @@ The **Sales Notification Chrome Extension** is designed for *~300 Business Devel
   - Unauthenticated users see a *fullscreen authentication popup*.
 - **Security**:
   - The API URL is **Base64-encoded** in the source code to reduce visibility.
-  - Uses **token-based authentication** (UUID) for API and WebSocket communication, eliminating the need for a hardcoded API key in the extension.
+  - Uses **token-based authentication** (a **JWT** issued by the backend's `/verify-otp`) for API and WebSocket communication, eliminating the need for a hardcoded API key in the extension.
 
 ## **Files**
 
@@ -36,15 +46,15 @@ The **Sales Notification Chrome Extension** is designed for *~300 Business Devel
 
 - **Google Chrome** browser.
 - A `@codingninjas.com` email address for authentication.
-- The **backend service** must be deployed and running (see [Backend README](../backend/README.md)).
+- The **backend service** must be deployed and running (see [`bellring-server`](https://github.com/Cramraika/bellring-server)).
 
 ### **Installation**
 
 1. **Clone or Download the Extension**:
    - Clone the repository or download the extension files to your local machine:
      ```bash
-     git clone <repository-url>
-     cd sales-notification-extension
+     git clone https://github.com/Cramraika/bellring-extension.git
+     cd bellring-extension
      ```
 2. **Load the Extension in Chrome**:
    - Open Chrome and go to `chrome://extensions/`.
@@ -83,7 +93,7 @@ The **Sales Notification Chrome Extension** is designed for *~300 Business Devel
 ## **Security Notes**
 
 - The API URL is **Base64-encoded** in `background.js` to reduce visibility, but it can be decoded by determined users. The backend is secured with **token-based authentication** to mitigate this risk.
-- The `authToken` (UUID) is stored in `chrome.storage.local`, which is **secure** and only accessible to the extension.
+- The `authToken` (JWT) is stored in `chrome.storage.local`, which is **secure** and only accessible to the extension.
 - WebSocket connections and API requests (`/request-otp`, `/verify-otp`) are authenticated using the `authToken` sent as a **Bearer token** in the `Authorization` header or as a query parameter (`/ws?token=<token>`).
 
 ## **Limitations**
