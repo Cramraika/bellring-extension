@@ -25,6 +25,9 @@ hold without a Read.
 
 <!-- END PLAYBOOKS BLOCK -->
 
+## License classification: commercial-bound
+Bellring whitelabel SaaS browser-extension surface (pairs with `bellring-server`; in production at CN reference customer). Per `commercial-bound.md`: GitNexus (PolyForm-NC) graph output MUST NOT be committed/shipped; use CGC (`codegraphcontext`) for any shippable graph artefact. This in-repo line is the routing signal §50.2 wants so agents pick cgc-over-gitnexus without re-deriving the license posture.
+
 ## Identity & Role
 
 `bellring-extension` is the **visible browser-extension half of Bellring** — Chrome MV3 extension that renders real-time celebratory popups (trophy animations, bell chime sound, multi-monitor placement) when a rep closes a sale. Pairs with `bellring-server`. Currently distributed via "Load unpacked" at CN (~300 BDEs reference customer); Chrome Web Store + Firefox Add-ons + Edge Add-ons submissions = Phase 3 of Bellring commercialization spec.
