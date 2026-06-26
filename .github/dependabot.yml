@@ -1,9 +1,0 @@
-# Dependabot config — OW-216 P5 (Snyk fleet dep-debt campaign)
-# Activated 2026-05-30. Repo is vanilla-JS Chrome MV3 — no package.json;
-# only github-actions ecosystem is scannable.
-version: 2
-updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "monthly"
