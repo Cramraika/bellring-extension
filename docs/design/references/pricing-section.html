@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bellring — Pricing</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ============================================================
+       TOKEN SYSTEM — ALL colors from this :root block only.
+       No hardcoded hex anywhere outside here.
+       ============================================================ */
+    :root {
+      /* Brand */
+      --brand-primary:        #FFD24A;
+      --brand-primary-hover:  #FFE07A;
+      --brand-primary-active: #DAB139;
+      --brand-secondary:      #3B82F6;
+      --brand-secondary-subtle: rgba(59, 130, 246, 0.10);
+
+      /* Neutral ramp */
+      --neutral-50:  #F5F7FB;
+      --neutral-100: #E6EAF2;
+      --neutral-200: #C4CAD8;
+      --neutral-300: #939BAF;
+      --neutral-400: #646C83;
+      --neutral-500: #424A60;
+      --neutral-600: #2C3347;
+      --neutral-700: #1C2134;
+      --neutral-800: #121626;
+      --neutral-900: #0A0D1A;
+      --neutral-950: #05070F;
+
+      /* Semantic */
+      --success: #3CCB7F;
+
+      /* Bell glow — celebratory overlays; never ambient */
+      --bell-glow:        0 0 40px rgba(255, 210, 74, 0.50);
+      --bell-glow-strong: 0 0 64px rgba(255, 210, 74, 0.70);
+
+      /* Card elevation shadow (non-glow cards) */
+      --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.40);
+
+      /* Typography */
+      --font-display: 'DM Sans', sans-serif;
+      --font-body:    'Inter', sans-serif;
+
+      /* Spacing — 8 px base */
+      --sp-1:  8px;
+      --sp-2:  16px;
+      --sp-3:  24px;
+      --sp-4:  32px;
+      --sp-5:  40px;
+      --sp-6:  48px;
+      --sp-8:  64px;
+      --sp-10: 80px;
+      --sp-12: 96px;
+
+      /* Border radius */
+      --radius-sm:   6px;
+      --radius-md:   12px;
+      --radius-lg:   18px;
+      --radius-pill: 9999px;
+
+      /* Easing — custom cubic-bezier per design-craft.md §D2 */
+      --ease-out:     cubic-bezier(0.23, 1, 0.32, 1);
+      --ease-in-out:  cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    /* ============================================================
+       RESET
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      color-scheme: dark;
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--neutral-900);
+      color: var(--neutral-200);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ============================================================
+       PRICING SECTION — outer wrapper
+       ============================================================ */
+    .pricing {
+      padding: var(--sp-12) var(--sp-4);
+    }
+
+    .pricing__inner {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .pricing__header {
+      text-align: center;
+      margin-bottom: var(--sp-8);
+    }
+
+    .pricing__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--brand-primary);
+      margin-bottom: var(--sp-3);
+    }
+
+    .pricing__eyebrow-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    .pricing__headline {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--neutral-50);
+      text-wrap: balance;
+      margin-bottom: var(--sp-2);
+      letter-spacing: -0.02em;
+    }
+
+    .pricing__subhead {
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--neutral-300);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* ============================================================
+       GRID — 3-col desktop → 1-col mobile
+       ============================================================ */
+    .pricing__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-3);
+      align-items: stretch;
+    }
+
+    /* ============================================================
+       CARDS
+       ============================================================ */
+    .pricing-card {
+      background-color: var(--neutral-800);
+      border: 1px solid var(--neutral-600);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-5) var(--sp-4);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: var(--shadow-card);
+    }
+
+    /* Growth card — the celebration anchor */
+    .pricing-card--featured {
+      border-color: var(--brand-primary);
+      box-shadow: var(--bell-glow);
+    }
+
+    /* Card hover — GPU-only (transform + opacity only per design-craft §D4) */
+    @media (prefers-reduced-motion: no-preference) {
+      .pricing-card {
+        transition:
+          transform 220ms var(--ease-out),
+          box-shadow 220ms var(--ease-out);
+      }
+
+      .pricing-card:not(.pricing-card--featured):hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.50);
+      }
+
+      .pricing-card--featured:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--bell-glow-strong);
+      }
+    }
+
+    /* ============================================================
+       BADGE
+       ============================================================ */
+    .pricing-card__badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--brand-primary);
+      color: var(--neutral-900);
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       TIER NAME
+       ============================================================ */
+    .pricing-card__tier {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      /* --neutral-300 on --neutral-800 ≈ 6.6:1 — WCAG AA for 11px/600 text */
+      color: var(--neutral-300);
+      margin-bottom: var(--sp-2);
+    }
+
+    .pricing-card--featured .pricing-card__tier {
+      color: var(--brand-primary);
+    }
+
+    /* ============================================================
+       PRICE
+       ============================================================ */
+    .pricing-card__price-block {
+      margin-bottom: var(--sp-2);
+    }
+
+    .pricing-card__amount {
+      font-family: var(--font-display);
+      font-size: clamp(2.25rem, 4vw, 2.875rem);
+      font-weight: 600;
+      color: var(--neutral-50);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pricing-card__currency {
+      font-size: 1.125rem;
+      font-weight: 500;
+      vertical-align: top;
+      margin-top: 7px;
+      display: inline-block;
+    }
+
+    .pricing-card__plus {
+      font-size: 1.375rem;
+      font-weight: 500;
+      vertical-align: middle;
+    }
+
+    .pricing-card__period {
+      display: block;
+      font-size: 0.8125rem;
+      /* --neutral-300 on --neutral-800 ≈ 6.6:1 — WCAG AA */
+      color: var(--neutral-300);
+      margin-top: 5px;
+      font-weight: 400;
+    }
+
+    /* ============================================================
+       VALUE HEADLINE — 3–5 word tier proposition
+       ============================================================ */
+    .pricing-card__headline {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--neutral-100);
+      line-height: 1.4;
+      margin-bottom: var(--sp-4);
+    }
+
+    /* ============================================================
+       DIVIDER
+       ============================================================ */
+    .pricing-card__divider {
+      border: none;
+      border-top: 1px solid var(--neutral-600);
+      margin-bottom: var(--sp-4);
+    }
+
+    /* ============================================================
+       FEATURE LIST
+       ============================================================ */
+    .pricing-card__features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+      margin-bottom: var(--sp-5);
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9375rem;
+      color: var(--neutral-200);
+      line-height: 1.5;
+    }
+
+    .feature-item__check {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      color: var(--success);
+    }
+
+    /* ============================================================
+       CTA BUTTONS
+       ============================================================ */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px var(--sp-3);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      text-align: center;
+      text-decoration: none;
+      line-height: 1;
+      margin-top: auto;
+      /* min-touch target ≥44px per WCAG + design-craft §G4 */
+      min-height: 48px;
+      align-content: center;
+    }
+
+    /* Neutral outline — Team */
+    .btn--outline {
+      background: transparent;
+      border-color: var(--neutral-500);
+      color: var(--neutral-100);
+    }
+
+    /* Yellow fill — Growth: dark text on bell-yellow for AA contrast */
+    .btn--primary {
+      background: var(--brand-primary);
+      border-color: var(--brand-primary);
+      color: var(--neutral-900);
+    }
+
+    /* Blue outline — Enterprise */
+    .btn--secondary {
+      background: transparent;
+      border-color: var(--brand-secondary);
+      color: var(--brand-secondary);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .btn {
+        transition:
+          background-color 150ms var(--ease-out),
+          border-color     150ms var(--ease-out),
+          color            150ms var(--ease-out),
+          box-shadow       150ms var(--ease-out);
+      }
+
+      .btn--outline:hover {
+        border-color: var(--neutral-300);
+        color: var(--neutral-50);
+      }
+
+      .btn--primary:hover {
+        background-color: var(--brand-primary-hover);
+        border-color: var(--brand-primary-hover);
+        box-shadow: var(--bell-glow);
+      }
+
+      .btn--primary:active {
+        background-color: var(--brand-primary-active);
+        border-color: var(--brand-primary-active);
+      }
+
+      .btn--secondary:hover {
+        background: var(--brand-secondary-subtle);
+      }
+    }
+
+    /* Keyboard focus — visible ring, all buttons */
+    .btn:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 3px;
+    }
+
+    /* ============================================================
+       FOOTER NOTE
+       ============================================================ */
+    .pricing__footer-note {
+      text-align: center;
+      margin-top: var(--sp-6);
+      font-size: 0.875rem;
+      /* --neutral-300 on --neutral-900 ≈ 5.7:1 — WCAG AA */
+      color: var(--neutral-300);
+      line-height: 1.6;
+    }
+
+    .pricing__footer-note a {
+      color: var(--neutral-300);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .pricing__footer-note a:hover {
+      color: var(--neutral-100);
+    }
+
+    .pricing__footer-note a:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ============================================================
+       RESPONSIVE — 3-col → 1-col
+       ============================================================ */
+    @media (max-width: 1023px) {
+      .pricing__grid {
+        grid-template-columns: 1fr;
+        max-width: 460px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* Featured card leads on mobile — clearest choice first */
+      .pricing-card--featured {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .pricing {
+        padding: var(--sp-10) var(--sp-2);
+      }
+
+      .pricing__header {
+        margin-bottom: var(--sp-6);
+      }
+
+      .pricing-card {
+        padding: var(--sp-4) var(--sp-3);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     BELLRING PRICING SECTION
+     Tiers: Team $19 · Growth $79 (featured) · Enterprise $299+
+     Memorable thing: the Growth card IS the bell-ring moment —
+     the only glow in a calm dark grid. Eyebrow frames the posture:
+     "Ring the bell when you close."
+     ============================================================ -->
+<section
+  class="pricing"
+  aria-labelledby="pricing-heading"
+>
+  <div class="pricing__inner">
+
+    <!-- HEADER -->
+    <header class="pricing__header">
+      <p class="pricing__eyebrow">
+        <!-- Inline SVG bell — brand mark, not emoji; aria-hidden so screen readers skip it -->
+        <svg
+          class="pricing__eyebrow-icon"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            d="M10 2.5c-.83 0-1.5.67-1.5 1.5v.42A5.5 5.5 0 0 0 4.5 9.5v3.25L3 14.5h14l-1.5-1.75V9.5A5.5 5.5 0 0 0 11.5 4.42V4c0-.83-.67-1.5-1.5-1.5Z"
+            fill="currentColor"
+          />
+          <path
+            d="M8.27 16.5a1.75 1.75 0 0 0 3.46 0"
+            stroke="currentColor"
+            stroke-width="1.25"
+            stroke-linecap="round"
+          />
+        </svg>
+        Ring the bell when you close
+      </p>
+
+      <h2 class="pricing__headline" id="pricing-heading">
+        Pick your plan
+      </h2>
+
+      <p class="pricing__subhead">
+        Every deal deserves a celebration.
+        Choose the tier that fits your floor.
+      </p>
+    </header>
+
+    <!-- TIER GRID -->
+    <div class="pricing__grid" role="list">
+
+      <!-- ── TEAM ── -->
+      <article
+        class="pricing-card"
+        role="listitem"
+        aria-label="Team plan, $19 per month"
+      >
+        <p class="pricing-card__tier">Team</p>
+
+        <div class="pricing-card__price-block">
+          <span class="pricing-card__amount">
+            <span class="pricing-card__currency">$</span>19
+          </span>
+          <span class="pricing-card__period">per month</span>
+        </div>
+
+        <p class="pricing-card__headline">
+          Your first bell,<br>wired to the CRM.
+        </p>
+
+        <hr class="pricing-card__divider" />
+
+        <ul class="pricing-card__features" aria-label="Team plan features">
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Up to 10 reps
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            1 CRM integration — HubSpot or Salesforce
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Real-time bell + confetti on every close
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Chrome extension
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Weekly leaderboard recap
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Email-OTP login
+          </li>
+        </ul>
+
+        <a href="#" class="btn btn--outline">
+          Start ringing
+        </a>
+      </article>
+
+      <!-- ── GROWTH (featured) ── -->
+      <article
+        class="pricing-card pricing-card--featured"
+        role="listitem"
+        aria-label="Growth plan — most popular — $79 per month"
+      >
+        <div class="pricing-card__badge" aria-label="Most popular plan">Most popular</div>
+
+        <p class="pricing-card__tier">Growth</p>
+
+        <div class="pricing-card__price-block">
+          <span class="pricing-card__amount">
+            <span class="pricing-card__currency">$</span>79
+          </span>
+          <span class="pricing-card__period">per month</span>
+        </div>
+
+        <p class="pricing-card__headline">
+          Every CRM, every rep,<br>every win on the board.
+        </p>
+
+        <hr class="pricing-card__divider" />
+
+        <ul class="pricing-card__features" aria-label="Growth plan features">
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Everything in Team
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Up to 50 reps
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            All CRM integrations — Salesforce, HubSpot, Pipedrive, Close
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Custom celebration animations + sound packs
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Advanced leaderboard + analytics
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Chrome, Firefox + Edge
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Priority support
+          </li>
+        </ul>
+
+        <a href="#" class="btn btn--primary">
+          Start ringing
+        </a>
+      </article>
+
+      <!-- ── ENTERPRISE ── -->
+      <article
+        class="pricing-card"
+        role="listitem"
+        aria-label="Enterprise plan, starting at $299 per month"
+      >
+        <p class="pricing-card__tier">Enterprise</p>
+
+        <div class="pricing-card__price-block">
+          <span class="pricing-card__amount">
+            <span class="pricing-card__currency">$</span>299<span class="pricing-card__plus">+</span>
+          </span>
+          <span class="pricing-card__period">per month</span>
+        </div>
+
+        <p class="pricing-card__headline">
+          Your bell, your logo,<br>your rules.
+        </p>
+
+        <hr class="pricing-card__divider" />
+
+        <ul class="pricing-card__features" aria-label="Enterprise plan features">
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Everything in Growth
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Unlimited reps
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Whitelabel — your bell, your logo
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            SAML / SCIM SSO
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Custom animation uploader
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Self-host Docker image
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            SOC 2 Type II + DPA
+          </li>
+          <li class="feature-item">
+            <svg class="feature-item__check" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 9.5 7 13.5 15 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Dedicated success manager + SLA
+          </li>
+        </ul>
+
+        <a href="#" class="btn btn--secondary">
+          Talk to us
+        </a>
+      </article>
+
+    </div><!-- /pricing__grid -->
+
+    <!-- FOOTER NOTE -->
+    <p class="pricing__footer-note">
+      14-day free trial on all plans. No card required.
+      <a href="#">See full feature comparison</a>
+    </p>
+
+  </div><!-- /pricing__inner -->
+</section>
+
+</body>
+</html>
