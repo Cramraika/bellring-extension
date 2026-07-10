@@ -40,12 +40,12 @@ Per matrix row `bellring-extension`:
 
 ```
 Mail | DNS | RP | Orch | Obs | Backup | Sup | Sec | Tun | Err | Wflw | Spec
- NA  | NA  | NA | NA   | NA  | NA     | T   | U   | NA  | NA  | NA   | NA
+ NA  | NA  | NA | NA   | NA  | NA     | T   | U   | NA  | U   | NA   | NA
 ```
 
-- USED: Sec (per-user UUID token in `chrome.storage.local`; CSP `script-src 'self'`; minimal `host_permissions`).
+- USED: Sec (per-user UUID token in `chrome.storage.local`; CSP `script-src 'self'`; minimal `host_permissions`). Err (`sentry-init.js` + vendored `@sentry/browser` wired against the self-hosted Glitchtip instance, per OW-106; project created 2026-05-19, reconcile reported In-sync=10; DSN injected at build time via `BELLRING_EXTENSION_GLITCHTIP_DSN`, no-ops silently if unset — see README § Error Reporting).
 - TRIGGER-TO-WIRE: Sup (Cosign post-PR-#50 fanout — extension distribution itself is signed via Chrome Web Store / Firefox Add-ons signing once published; CI signing is for the build pipeline).
-- NA: Mail, DNS, RP, Orch, Obs, Backup, Tun, Err, Wflw, Spec — extension is a client-side artefact distributed via Chrome Web Store (when published).
+- NA: Mail, DNS, RP, Orch, Obs, Backup, Tun, Wflw, Spec — extension is a client-side artefact distributed via Chrome Web Store (when published); no server-side surface for those dims.
 
 ## What's Wired (current state)
 
@@ -70,7 +70,7 @@ Mail | DNS | RP | Orch | Obs | Backup | Sup | Sec | Tun | Err | Wflw | Spec
 ### Bellring whitelabel commercialization (`~/.claude/specs/2026-04-19-sales-notification-whitelabel.md`)
 - **Phase 0 (Week 0, 2-3 days):** strip CN branding; remove base64 URL hack; register `bellring.<tld>` + brand site.
 - **Phase 1 (Weeks 1-2, 30h):** swap `ws` for `@supabase/supabase-js` Realtime; drop standalone backend (Supabase Auth + Postgres + Realtime owns state); read `apiBaseUrl` + `workspaceSlug` from `chrome.storage.sync`; install-time onboarding popup; brand config loader.
-- **Phase 2 (Week 3):** Stripe tiers; PostHog; Sentry browser SDK.
+- **Phase 2 (Week 3):** Stripe tiers; PostHog; ~~Sentry browser SDK~~ — **DONE** (OW-106, `5061865`; see Coverage Today Err row).
 - **Phase 3 (Week 4):** Chrome Web Store + Firefox Add-ons + Edge Add-ons submissions; privacy + ToS + DPA; docs site.
 - **Phase 4 (Weeks 5-6):** CRM adapters (LeadSquared P0, Salesforce + HubSpot P1); Product Hunt launch.
 - **Phase 5 (ongoing):** SAML/SCIM, custom animation uploader, SOC 2 Type II.
