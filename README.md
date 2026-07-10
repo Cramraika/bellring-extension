@@ -103,16 +103,16 @@ real-time updates and integrates with the backend for user authentication via **
 
 ## **Error Reporting (Sentry / Glitchtip)**
 
-The extension ships with a vendored `@sentry/browser` SDK wired against the
-self-hosted Glitchtip instance at `errors.chinmayramraika.in`.
+The extension ships with a vendored `@sentry/browser` SDK. Error reporting is
+**opt-in at build time** and points at whatever Sentry-compatible error store you
+configure via its DSN — nothing is hard-coded.
 
-**Build-time setup (operator, pre-Chrome-Web-Store packaging):**
+**Build-time setup (pre-Chrome-Web-Store packaging):**
 
-1. Pull DSN from Infisical (path
-   `main-host:/host-page/BELLRING_EXTENSION_GLITCHTIP_DSN`) and export it:
+1. Export the DSN for your error store (retrieve it from your own secrets manager):
 
    ```bash
-   export BELLRING_EXTENSION_GLITCHTIP_DSN="$(infisical secrets get --plain ...)"
+   export BELLRING_EXTENSION_GLITCHTIP_DSN="<your-sentry-or-glitchtip-dsn>"
    ```
 
 2. Fetch the vendored SDK bundle (once per release):
@@ -133,8 +133,8 @@ self-hosted Glitchtip instance at `errors.chinmayramraika.in`.
 When `BELLRING_EXTENSION_GLITCHTIP_DSN` is unset (e.g. dev / CI), the SDK silently
 no-ops — the extension keeps working without error reporting.
 
-`host_permissions` includes `https://errors.chinmayramraika.in/*` so Sentry can
-POST events without cross-origin issues.
+`host_permissions` must include your error store's origin so the SDK can POST
+events without cross-origin issues.
 
 ## License
 
