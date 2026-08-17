@@ -71,14 +71,61 @@ jobs:
           # directly; this env is belt-and-braces.
           SEMGREP_APP_TOKEN: ''
         run: |
-          semgrep scan \
-            --config=p/default \
-            --config=p/security-audit \
-            --config=p/secrets \
-            --sarif --sarif-output=results.sarif \
-            --metrics=off \
-            --error \
-            || echo "Semgrep exited non-zero (findings present) — surfacing as artifact"
+            # BASELINE, computed per event. `|| echo` used to be on the end of this scan, which
+            # made the step exit 0 whatever semgrep returned and left `--error` inert — the gate
+            # could not fail. It was not removable on its own: these repos carry hundreds of
+            # pre-existing findings, so a bare `--error` fails every push forever and gets reverted.
+            # Gating on NEW findings is what makes failing sustainable.
+            #
+            # The obvious `git merge-base origin/main HEAD` is right for a pull_request and WRONG for
+            # a push to main: after the push HEAD *is* origin/main, so merge-base returns HEAD, the
+            # diff is empty, and the gate passes unconditionally — the same defect wearing a new hat.
+            # For a push the baseline must be where the branch was BEFORE it.
+            BASELINE=""
+            case "${GITHUB_EVENT_NAME}" in
+              pull_request)
+                git fetch --quiet origin "${GITHUB_BASE_REF}" || true
+                BASELINE="$(git merge-base "origin/${GITHUB_BASE_REF}" HEAD || true)"
+                ;;
+              push)
+                BEFORE="${EVENT_BEFORE:-}"
+                # All-zeros means a newly created branch — there is no "before" to diff against.
+                case "${BEFORE}" in
+                  ""|0000000000000000000000000000000000000000) BASELINE="" ;;
+                  *) git cat-file -e "${BEFORE}^{commit}" 2>/dev/null && BASELINE="${BEFORE}" || BASELINE="" ;;
+                esac
+                ;;
+            esac
+
+            # A baseline equal to HEAD means an empty diff, which semgrep reports as clean. That is
+            # indistinguishable from a passing gate, so refuse rather than report success.
+            if [ -n "${BASELINE}" ] && [ "${BASELINE}" = "$(git rev-parse HEAD)" ]; then
+              echo "Baseline resolved to HEAD — the diff would be empty and this gate would pass" >&2
+              echo "without scanning anything. Refusing. Event=${GITHUB_EVENT_NAME}" >&2
+              exit 1
+            fi
+
+            if [ -n "${BASELINE}" ]; then
+              echo "Gating on findings NEW since ${BASELINE}"
+              semgrep scan \
+                --config=p/default \
+                --config=p/security-audit \
+                --config=p/secrets \
+                --sarif --sarif-output=results.sarif \
+                --metrics=off \
+                --baseline-commit "${BASELINE}" \
+                --error
+            else
+              # No baseline (manual run, or a brand-new branch): full scan, reported not gated. The
+              # SARIF still uploads, so the finding set is visible without failing on inherited debt.
+              echo "No baseline for event=${GITHUB_EVENT_NAME} — full scan, advisory only"
+              semgrep scan \
+                --config=p/default \
+                --config=p/security-audit \
+                --config=p/secrets \
+                --sarif --sarif-output=results.sarif \
+                --metrics=off
+            fi
 
       - name: Upload SARIF artifact
         if: always()
