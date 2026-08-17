@@ -130,8 +130,22 @@ jobs:
       - name: Upload SARIF artifact
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        # Sink changed from upload-artifact to upload-sarif. The artifact sink had NO READER —
+        # every reference to "semgrep-sarif" across the workspace was a producer, none a consumer
+        # (control: the same grep for "upload-artifact" matched 20 files). A SARIF file nothing
+        # opens is a scan whose findings exist and are never seen: the display-layer twin of the
+        # gate that could not fail, fixed in the same commit series.
+        #
+        # Free on public repos — code-scanning/alerts returns 404 "no analysis found" here rather
+        # than the 403 the private repos return, so the feature is available and merely empty.
+        # SHA-pinned to match this repo's convention (and because a mutable tag on a sink with
+        # security-events:write is exactly the finding semgrep raises against the siblings).
+        # v3 → f3712979, verified against the API with a bogus-SHA negative control.
+        #
+        # Checked before publishing: 6 findings here, all `warning`, zero ERROR — 3 xss,
+        # 2 missing-integrity, 1 renovate config. This repo's source is already world-readable, so
+        # indexing its lint findings is not new disclosure.
+        uses: github/codeql-action/upload-sarif@f3712979fa5f215279b101dd0a2e3bdfb4353324 # v3
         with:
-          name: semgrep-sarif
-          path: results.sarif
-          if-no-files-found: warn
+          sarif_file: results.sarif
+          category: semgrep
