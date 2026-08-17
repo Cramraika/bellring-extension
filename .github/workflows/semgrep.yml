@@ -50,6 +50,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          # fetch-depth 0 because the gate below diffs against a BASELINE commit.
+          # The default of 1 leaves github.event.before outside the object store, so the
+          # baseline silently fails to resolve and the scan drops to advisory — a gate that
+          # cannot fail, which is the defect this workflow was just fixed for.
+          fetch-depth: 0
 
       - name: Install Semgrep
         run: |
@@ -115,16 +121,28 @@ jobs:
                 --metrics=off \
                 --baseline-commit "${BASELINE}" \
                 --error
-            else
-              # No baseline (manual run, or a brand-new branch): full scan, reported not gated. The
-              # SARIF still uploads, so the finding set is visible without failing on inherited debt.
-              echo "No baseline for event=${GITHUB_EVENT_NAME} — full scan, advisory only"
+            elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+              # Advisory is correct ONLY here: a manual run has nothing meaningful to diff against.
+              # The SARIF still uploads, so the finding set stays visible without failing on
+              # inherited debt.
+              echo "Manual run — full scan, advisory only"
               semgrep scan \
                 --config=p/default \
                 --config=p/security-audit \
                 --config=p/secrets \
                 --sarif --sarif-output=results.sarif \
                 --metrics=off
+            else
+              # On push and pull_request an unresolvable baseline is a BROKEN GATE, not a reason to
+              # relax. Falling through to an advisory scan here is how the first version of this fix
+              # was still green-by-construction: checkout defaults to fetch-depth 1, so
+              # github.event.before was absent from the shallow object store, cat-file failed, and
+              # every push quietly took the advisory path. fetch-depth: 0 above is what makes the
+              # baseline resolvable; this branch is what makes its ABSENCE loud instead of silent.
+              echo "Baseline could not be resolved for event=${GITHUB_EVENT_NAME}." >&2
+              echo "Refusing to report a green gate from an ungated scan. Check that the checkout" >&2
+              echo "step uses fetch-depth: 0 and that the base ref was fetched." >&2
+              exit 1
             fi
 
       - name: Upload SARIF artifact
