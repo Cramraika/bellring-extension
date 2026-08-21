@@ -59,15 +59,29 @@ jobs:
 
       - name: Install Semgrep
         run: |
-          # User-writable install (no sudo on macOS self-hosted runners).
-          # Match Trivy install pattern from ci.yml.
-          SEMGREP_DIR="${RUNNER_TOOL_CACHE:-$HOME/.cache}/semgrep"
-          mkdir -p "${SEMGREP_DIR}"
-          python3 -m pip install --user --upgrade semgrep
-          # Surface install location for downstream steps
-          PIP_USER_BIN="$(python3 -c 'import site; print(site.USER_BASE)')/bin"
-          echo "${PIP_USER_BIN}" >> "${GITHUB_PATH}"
-          "${PIP_USER_BIN}/semgrep" --version
+          set -euo pipefail
+          # A VENV, NOT `pip install --user`. The runner's python3 is Homebrew-managed, and Homebrew
+          # marks its interpreter externally-managed (PEP 668), so `--user` does not fall back to a user
+          # site — it REFUSES:
+          #
+          #     error: externally-managed-environment
+          #
+          # The `--break-system-packages` escape hatch pip suggests would write into the Homebrew prefix
+          # of a machine that is also the operator's workstation, to install a linter. A venv is the
+          # sanctioned path and leaves the runner's python untouched.
+          #
+          # Cache-guarded on the BINARY being executable, not on the directory existing — the same
+          # reasoning the Trivy install states: a partial or interrupted install leaves the directory
+          # present and the tool unusable, which is exactly the state a presence check reports as fine.
+          SEMGREP_DIR="${RUNNER_TOOL_CACHE:-$HOME/.cache}/semgrep/venv"
+          if [ ! -x "${SEMGREP_DIR}/bin/semgrep" ]; then
+            rm -rf "${SEMGREP_DIR}"
+            python3 -m venv "${SEMGREP_DIR}"
+            "${SEMGREP_DIR}/bin/python" -m pip install --quiet --upgrade pip
+            "${SEMGREP_DIR}/bin/python" -m pip install --quiet --upgrade semgrep
+          fi
+          echo "${SEMGREP_DIR}/bin" >> "${GITHUB_PATH}"
+          "${SEMGREP_DIR}/bin/semgrep" --version
 
       - name: Semgrep scan (default + security-audit + secrets)
         env:
