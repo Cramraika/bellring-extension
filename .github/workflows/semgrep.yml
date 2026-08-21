@@ -90,6 +90,15 @@ jobs:
           # We use `semgrep scan` (not `semgrep ci`) which honors --config
           # directly; this env is belt-and-braces.
           SEMGREP_APP_TOKEN: ''
+          # THE BASELINE SHA, WHICH THE SCRIPT BELOW READS AND NOTHING EVER SET. `EVENT_BEFORE` is not
+          # an Actions-provided variable — unlike GITHUB_EVENT_NAME and GITHUB_BASE_REF, which the
+          # runner exports itself — so it has to be mapped from the event payload here. It never was.
+          #
+          # The consequence was not a wrong baseline, it was NO baseline: `${EVENT_BEFORE:-}` expanded
+          # empty on every run, the empty case set BASELINE="", and the push branch fell through to
+          # "Refusing to report a green gate from an ungated scan" and exited 1. This gate has been
+          # structurally incapable of passing on a push since it was written.
+          EVENT_BEFORE: ${{ github.event.before }}
         run: |
             # BASELINE, computed per event. `|| echo` used to be on the end of this scan, which
             # made the step exit 0 whatever semgrep returned and left `--error` inert — the gate
