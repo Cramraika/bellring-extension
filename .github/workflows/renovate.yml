@@ -25,7 +25,8 @@ permissions:
 
 jobs:
   renovate:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_TYPE || 'self-hosted' }}   # hosted runners are unavailable for this account: these jobs were queued with
+                                                  # labels=ubuntu-latest, no runner assigned and no log output — they never ran at all.
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -37,12 +38,22 @@ jobs:
           app-id: ${{ secrets.RENOVATE_APP_ID }}
           private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
 
-      - name: Self-hosted Renovate
-        uses: renovatebot/github-action@1a96852b0384df1837619d04c60b2d10d1f9ff08 # v46.1.21
+      # Renovate runs from the CLI, NOT renovatebot/github-action: that action runs Renovate
+      # inside a container, and on the self-hosted Mac runner Docker is colima — when colima is
+      # not up at the scheduled time the step dies before Renovate starts. Proven fix: vps-ansible
+      # went green this way and opened its first Renovate PRs since 2026-08-09.
+      # Version pinned, and looked up (`npm view renovate version`) rather than guessed — an
+      # invented pin fails with npm ETARGET, which is how the first attempt at this failed.
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          configurationFile: .github/renovate.json
-          token: ${{ steps.app-token.outputs.token }}
+          node-version: '22'
+
+      - name: Self-hosted Renovate
+        run: npx --yes renovate@44.37.1
         env:
+          RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
+          RENOVATE_CONFIG_FILE: .github/renovate.json
           LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
           RENOVATE_REPOSITORIES: ${{ github.repository }}
           RENOVATE_ONBOARDING: 'false'
