@@ -46,6 +46,7 @@ jobs:
   semgrep:
     name: semgrep/ci
     runs-on: ${{ vars.RUNNER_TYPE || 'self-hosted' }}
+    timeout-minutes: 30
     if: (github.actor != 'dependabot[bot]')
     steps:
       - name: Checkout
